@@ -1,0 +1,9 @@
+/* index.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Apply the global font */
+body {
+  @apply font-sans; /* Applies the 'Inter' font we set in tailwind.config.js */
+}

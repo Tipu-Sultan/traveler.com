@@ -1,0 +1,9 @@
+.auth-container {
+  background-image: url('https://www.ehimachal.org/wp-content/themes/ehimachal/assets/img/lakes/chandra-taal-lake.webp'); /* Replace with your image path */
+  background-size: cover;
+  background-position: center;
+  height: 100vh; /* Full viewport height */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
