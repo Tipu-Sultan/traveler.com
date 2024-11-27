@@ -1,30 +1,23 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { search, fetchSuggestions, clearSuggestions } from '../redux/slices/searchSlice'; // Adjust the import path as needed
+import { search, clearSuggestions, fetchSuggestions } from '../redux/slices/searchSlice'; // Adjust the import path as needed
 import { useLocation, useNavigate } from 'react-router-dom';
 import useBookingForm from '../hooks/useBookingForm';
 import Calendar from 'react-calendar';
 
 const SearchBar = () => {
   const location = useLocation();
+  const params = new URLSearchParams(location.search);
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { bookingDetails } = useSelector((state) => state.booking);
-
   const {
-    travelDate,
-    travelers,
-    startPoint,
-    endPoint,
-    setTravelDate, 
-    setTravelers,
-    setStartPoint,
-    setEndPoint,
+    showCalendar,
+    setShowCalendar,
+    bookingDetails,
+    updateBookingDetails,
     handleDateChange,
-    showCalendar, 
-    setShowCalendar
-  } = useBookingForm(bookingDetails);
+  } = useBookingForm();
 
   const debounceTimeout = 300;
   const debounceTimer = useRef(null); // Timer for debouncing suggestions
@@ -33,49 +26,86 @@ const SearchBar = () => {
   // Redux state for suggestions
   const { suggestions, loading } = useSelector((state) => state.search);
 
-  // Fetch the "end" query param from URL and trigger search on mount
   useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    const endParam = params.get('end') || '';
-
-    setStartPoint(params.get('start') || '');
-    setEndPoint(endParam);
-    setTravelDate(params.get('date') || '');
-    setTravelers(params.get('travelers') || 1);
-
-    // Dispatch search action if "end" param is present
+    const startParam = params.get('start');
+    const endParam = params.get('end');
+    const date = params.get('date');
+    const travelers = params.get('travelers');
+  
+    // Update bookingDetails if URL params change
+    if (startParam && startParam !== bookingDetails.startPoint) {
+      updateBookingDetails('startPoint', startParam);
+    }
+    if (endParam && endParam !== bookingDetails.endPoint) {
+      updateBookingDetails('endPoint', endParam);
+    }
+    if (date && date !== bookingDetails.travelDate) {
+      updateBookingDetails('travelDate', date);
+    }
+    if (travelers && travelers !== bookingDetails.travelers) {
+      updateBookingDetails('travelers', travelers || 1);
+    }
+  
+    // Dispatch search again if the endParam is present
     if (endParam) {
       dispatch(search({ query: endParam, page: 1 }));
       dispatch(clearSuggestions());
     }
-  }, [location.search, dispatch, setStartPoint, setEndPoint, setTravelDate, setTravelers]);
+  }, [location.search]); // Trigger re-run on URL change
+  
+
+  useEffect(() => {
+    const endParam = params.get('end');
+
+    if (endParam) {
+      dispatch(search({ query: endParam, page: 1 }));
+      dispatch(clearSuggestions());
+    }
+  }, [dispatch])
 
   // Fetch suggestions based on endPoint with debouncing
   useEffect(() => {
-    if (endPoint.trim() && previousQueryRef.current !== endPoint) {
+    const endPoint = bookingDetails.endPoint;
+  
+    // Ensure the endpoint has changed and is different from the previous one to avoid repeated API calls.
+    if (endPoint && endPoint !== previousQueryRef.current) {
+      // Clear existing suggestions whenever the endpoint changes
+      dispatch(clearSuggestions());
+  
+      // Start debouncing the API call
       if (debounceTimer.current) {
         clearTimeout(debounceTimer.current);
       }
-
+  
       // Set a new debounce timer
       debounceTimer.current = setTimeout(() => {
-        dispatch(fetchSuggestions(endPoint)); 
-      dispatch(clearSuggestions());
-        previousQueryRef.current = endPoint;
+        // Dispatch the fetchSuggestions action
+        dispatch(fetchSuggestions(endPoint));
+        previousQueryRef.current = endPoint; // Update previous query
       }, debounceTimeout);
     }
-
+  
+    // Cleanup: Clear the debounce timer when the component is unmounted or dependencies change
     return () => {
       if (debounceTimer.current) {
         clearTimeout(debounceTimer.current);
       }
     };
-  }, [endPoint, dispatch]);
-
-  // Function to handle the search action
+  }, [dispatch, bookingDetails.endPoint]); // This will run when the endPoint value changes
+  
+  
+  // Function to handle the search action when the "Search" button is clicked
   const handleSearch = () => {
-    const query = `start=${startPoint}&end=${endPoint}&date=${travelDate}&travelers=${travelers}`;
+    const query = `start=${bookingDetails?.startPoint}&end=${bookingDetails?.endPoint}&date=${bookingDetails?.travelDate}&travelers=${bookingDetails?.travelers}`;
     navigate(`/search?${query}`);
+    dispatch(search({ query: bookingDetails?.endPoint, page: 1 }));
+    dispatch(clearSuggestions());
+  };
+
+  // Handle input change for start or end point
+  const handleInputChange = (key, value) => {
+    updateBookingDetails(key, value);
+    // Clear suggestions whenever the input changes
     dispatch(clearSuggestions());
   };
 
@@ -87,8 +117,8 @@ const SearchBar = () => {
           <input
             type="text"
             placeholder="Starting Point"
-            value={startPoint}
-            onChange={(e) => setStartPoint(e.target.value)}
+            value={bookingDetails?.startPoint}
+            onChange={(e) => handleInputChange('startPoint', e.target.value)}
             className="w-full h-12 px-4 border border-gray-300 rounded-lg shadow-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-300"
             aria-label="Starting Point"
           />
@@ -99,14 +129,14 @@ const SearchBar = () => {
           <input
             type="text"
             placeholder="Ending Point"
-            value={endPoint}
-            onChange={(e) => setEndPoint(e.target.value)}
+            value={bookingDetails?.endPoint}
+            onChange={(e) => handleInputChange('endPoint', e.target.value)}
             className="w-full h-12 px-4 border border-gray-300 rounded-lg shadow-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-300"
             aria-label="Ending Point"
           />
 
           {/* Suggestions dropdown */}
-          {endPoint && suggestions.length > 0 && (
+          {bookingDetails?.endPoint && suggestions.length > 0 && (
             <ul className="absolute w-full bg-white border border-gray-300 rounded-b-lg shadow-lg z-10 max-h-60 overflow-y-auto mt-1">
               {loading === 'suggestion' ? (
                 <li className="p-2 text-center text-gray-500">Loading...</li>
@@ -115,10 +145,10 @@ const SearchBar = () => {
                   <li
                     key={index}
                     onClick={() => {
-                      setEndPoint(suggestion.state); 
+                      handleInputChange('endPoint', suggestion.state);
                       dispatch(clearSuggestions());
                     }}
-                    onMouseDown={(e) => e.preventDefault()} 
+                    onMouseDown={(e) => e.preventDefault()}
                     className="p-2 cursor-pointer hover:bg-orange-100 hover:text-orange-700 transition duration-150 ease-in-out"
                     role-area="option"
                   >
@@ -143,13 +173,13 @@ const SearchBar = () => {
             className="w-full h-12 px-4 border border-gray-300 rounded-lg shadow-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-300"
             aria-label="Travel Date"
           >
-            {travelDate ? travelDate : "Select Travel Date"}
+            {bookingDetails?.travelDate ? bookingDetails?.travelDate : "Select Travel Date"}
           </button>
 
           {/* Calendar Modal */}
           {showCalendar && (
-            <div className="absolute top-full mt-2 w-full z-20 bg-white border border-gray-300 rounded-lg shadow-lg">
-              <Calendar onChange={handleDateChange} value={travelDate} />
+            <div onClick={() => setShowCalendar(!showCalendar)} className="absolute top-full mt-2 w-full z-20 bg-white border border-gray-300 rounded-lg shadow-lg">
+              <Calendar onChange={handleDateChange} value={bookingDetails?.travelDate} />
             </div>
           )}
         </div>
@@ -159,8 +189,8 @@ const SearchBar = () => {
           <input
             type="number"
             min="1"
-            value={travelers}
-            onChange={(e) => setTravelers(e.target.value)}
+            value={bookingDetails?.travelers}
+            onChange={(e) => handleInputChange('travelers', e.target.value)}
             className="w-full h-12 px-4 border border-gray-300 rounded-lg shadow-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-300"
             aria-label="Number of Travelers"
           />

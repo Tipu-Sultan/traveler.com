@@ -1,4 +1,4 @@
-export function generateOrderId(packageName) {
+export function generateOrderId(packageName=null) {
     // Extract the first letter of each word in the package name
     const packageInitials = packageName
       .split(' ')            // Split the package name into words

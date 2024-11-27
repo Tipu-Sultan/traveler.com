@@ -3,33 +3,28 @@ import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import useBookingForm from '../../hooks/useBookingForm';
 
-const BookingDetailsForm = ({ bookingDetails,hotel }) => {
+const BookingDetailsForm = () => {
   const {
-    travelDate,
-    travelers,
-    extraRooms,
-    commuteType,
-    hotelName,
-    setTravelers,
-    setExtraRooms,
-    setCommuteType,
-    setHotelName,
     handleDateChange,
-  } = useBookingForm(bookingDetails);
+    bookingDetails,
+    updateBookingDetails,
+  } = useBookingForm();
 
   const handleTravelersChange = (action) => {
+    const currentTravelers = Number(bookingDetails?.travelers) || 1;
     if (action === 'increment') {
-      setTravelers((prev) => prev + 1);
-    } else if (action === 'decrement' && travelers > 1) {
-      setTravelers((prev) => prev - 1);
+      updateBookingDetails('travelers', currentTravelers + 1);
+    } else if (action === 'decrement' && currentTravelers > 1) {
+      updateBookingDetails('travelers', currentTravelers - 1);
     }
   };
 
   const handleRoomsChange = (action) => {
+    const currentRooms = bookingDetails?.extraRooms || 0;
     if (action === 'increment') {
-      setExtraRooms((prev) => prev + 1);
-    } else if (action === 'decrement' && extraRooms > 0) {
-      setExtraRooms((prev) => prev - 1);
+      updateBookingDetails('extraRooms', currentRooms + 1);
+    } else if (action === 'decrement' && currentRooms > 0) {
+      updateBookingDetails('extraRooms', currentRooms - 1);
     }
   };
 
@@ -43,8 +38,8 @@ const BookingDetailsForm = ({ bookingDetails,hotel }) => {
         <div className="text-gray-700">
           <span>Select Travel Date:</span>
           <Calendar
-            onChange={handleDateChange} 
-            value={travelDate}
+            onChange={handleDateChange}
+            value={new Date(bookingDetails?.travelDate || Date.now())}
             className="mt-3 border border-gray-300 rounded-md w-full md:max-w-md" // Medium-sized calendar
           />
         </div>
@@ -63,9 +58,8 @@ const BookingDetailsForm = ({ bookingDetails,hotel }) => {
               </button>
               <input
                 type="number"
-                value={travelers}
-                onChange={(e) => setTravelers(Math.max(1, e.target.value))}
-                min="1"
+                value={bookingDetails?.travelers}
+                readOnly
                 className="w-16 text-center border border-gray-300 rounded-md"
               />
               <button
@@ -89,9 +83,8 @@ const BookingDetailsForm = ({ bookingDetails,hotel }) => {
               </button>
               <input
                 type="number"
-                value={extraRooms}
-                onChange={(e) => setExtraRooms(Math.max(0, e.target.value))}
-                min="0"
+                value={bookingDetails?.extraRooms || 0}
+                readOnly
                 className="w-16 text-center border border-gray-300 rounded-md"
               />
               <button
@@ -107,8 +100,8 @@ const BookingDetailsForm = ({ bookingDetails,hotel }) => {
           <div>
             <span className="text-gray-700">Commute Type:</span>
             <select
-              value={commuteType || bookingDetails.commuteType}
-              onChange={(e) => setCommuteType(e.target.value)}
+              value={bookingDetails?.commuteType || 'flight'}
+              onChange={(e) => updateBookingDetails('commuteType', e.target.value)}
               className="mt-3 w-full p-2 border border-gray-300 rounded-md"
             >
               <option value="flight">Flight</option>
@@ -121,12 +114,36 @@ const BookingDetailsForm = ({ bookingDetails,hotel }) => {
             <span className="text-gray-700">Hotel Name:</span>
             <input
               type="text"
-              value={hotelName || hotel}
-              onChange={(e) => setHotelName(e.target.value)}
+              value={bookingDetails?.hotelName || ''}
+              onChange={(e) => updateBookingDetails('hotelName', e.target.value)}
               required
               className="mt-3 w-full p-2 border border-gray-300 rounded-md"
             />
           </div>
+        </div>
+      </div>
+
+      {/* Start and End Points */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+        <div>
+          <span className="text-gray-700">Start Point:</span>
+          <input
+            type="text"
+            value={bookingDetails?.startPoint || ''}
+            onChange={(e) => updateBookingDetails('startPoint', e.target.value)}
+            required
+            className="mt-3 w-full p-2 border border-gray-300 rounded-md"
+          />
+        </div>
+        <div>
+          <span className="text-gray-700">End Point:</span>
+          <input
+            type="text"
+            value={bookingDetails?.endPoint || ''}
+            onChange={(e) => updateBookingDetails('endPoint', e.target.value)}
+            required
+            className="mt-3 w-full p-2 border border-gray-300 rounded-md"
+          />
         </div>
       </div>
     </div>

@@ -1,59 +1,20 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import useRazorpayPayment from '../hooks/useRazorpayPayment';
 import Layout from '../layout/Layout';
 import useBookingForm from '../hooks/useBookingForm';
-import { useLocation } from 'react-router-dom';
-import useBookingData from '../hooks/useBookingData';
 import { useSelector } from 'react-redux';
 import DynamicModal from '../components/modals/DynamicModal';
 
 const PaymentPage = () => {
-  const location = useLocation();
-  
-  const params = useMemo(() => new URLSearchParams(location.search), [location.search]);
-  
-  const { bookingDetails, finalPlace } = useBookingData(params.get('packageId'));
+    
+  const { bookingDetails} = useBookingForm();
   const {loading} = useSelector((state) => state.booking);
   const [modalVisible, setModalVisible] = useState(false);  
 
   const { initiatePayment } = useRazorpayPayment(bookingDetails,setModalVisible);
 
-  const {
-    setTravelDate, 
-    setTravelers,
-    setStartPoint,
-    setEndPoint,
-    setPackageId,
-    setHotelName,
-    setPackageName,
-    setCommuteType
-  } = useBookingForm(bookingDetails);
 
-  useEffect(() => {
-    if (params.get('start') && params.get('end')) {
-      setStartPoint(params.get('start') || '');
-      setEndPoint(params.get('end'));
-      setTravelDate(params.get('date') || '');
-      setTravelers(params.get('travelers') || 1);
-      setPackageId(params.get('packageId') || '');
-      setHotelName(finalPlace?.hotels?.[0]?.name || '');
-      setPackageName(finalPlace?.name || '');
-      setCommuteType(params.get('commute') || '');
-    }
-  }, [
-    finalPlace?.hotels,
-    finalPlace?.name,
-    finalPlace.packageId,
-    params, 
-    setCommuteType,
-    setEndPoint,
-    setHotelName,
-    setPackageId,
-    setPackageName,
-    setStartPoint,
-    setTravelDate,
-    setTravelers,
-  ]);
+  
 
   return (
     <Layout title={'Payment || Traveler'}>
@@ -63,7 +24,7 @@ const PaymentPage = () => {
             {/* Left Section */}
             <div className="flex flex-col items-center text-center p-6 space-y-4">
               <img
-                src={'https://travellercom.vercel.app/static/media/logo.10af85ce2e3989e8d87e.jpg'}
+                src={'https://travelercom.vercel.app/static/media/logo.10af85ce2e3989e8d87e.jpg'}
                 alt="Company Logo"
                 className="w-36 h-36 object-contain rounded-full shadow-md"
               />

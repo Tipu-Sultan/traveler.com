@@ -20,52 +20,48 @@ const BookingPage = () => {
   const packageId = searchParams.get('packageId');
   const navigate = useNavigate();
 
-  const { finalPlace, loading, error, bookingDetails } = useBookingData(packageId);
+  const { finalPlace, loading, error } = useBookingData(packageId);
 
   const {
-    travelDate,
-    travelers,
-    startPoint,
-    endPoint,
-    setTravelDate,
-    setTravelers,
-    setStartPoint,
-    setEndPoint,
-    setPackageId,
-    setHotelName,
-    setPackageName,
-    setCommuteType
-  } = useBookingForm(bookingDetails);
+    bookingDetails,
+    updateBookingDetails
+  } = useBookingForm();
   const [cnfmBooking, setCnfmBooking] = useState(false);
+  useEffect(() => {
+    const startParam = searchParams.get('start');
+    const endParam = searchParams.get('end');
+    const date = searchParams.get('date');
+    const travelers = searchParams.get('travelers');
+  
+    // Update bookingDetails if URL params change
+    if (startParam && startParam !== bookingDetails.startPoint) {
+      updateBookingDetails('startPoint', startParam);
+    }
+    if (endParam && endParam !== bookingDetails.endPoint) {
+      updateBookingDetails('endPoint', endParam);
+    }
+    if (date && date !== bookingDetails.travelDate) {
+      updateBookingDetails('travelDate', date);
+    }
+    if (travelers && travelers !== bookingDetails.travelers) {
+      updateBookingDetails('travelers', travelers || 1);
+    }
+  }, [location.search]);
 
   const handleProceedToPayment = () => {
     const redirectUrl = encodeURIComponent(
-      `/booking/checkout?start=${startPoint}&end=${endPoint}&date=${travelDate}&travelers=${travelers}&packageId=${packageId}`
+      `/booking/checkout?start=${bookingDetails.startPoint}&end=${bookingDetails.endPoint}&date=${bookingDetails.travelDate}&travelers=${bookingDetails.travelers}&packageId=${packageId}`
     );
 
     if (!isAuthenticated) {
       navigate(`/login?redirect=${redirectUrl}`);
     } else {
       setCnfmBooking(true);
-      navigate(`/booking/checkout?start=${startPoint}&end=${endPoint}&date=${bookingDetails.travelDate}&travelers=${bookingDetails.travelers}&commute=${bookingDetails?.commuteType}&package=${bookingDetails?.packageName}&hotel=${bookingDetails?.hotelName}&packageId=${packageId}`);
+      navigate(`/booking/checkout?start=${bookingDetails?.startPoint}&end=${bookingDetails?.endPoint}&date=${bookingDetails.travelDate}&travelers=${bookingDetails.travelers}&commute=${bookingDetails?.commuteType}&package=${bookingDetails?.packageName}&hotel=${bookingDetails?.hotelName}&packageId=${packageId}`);
     }
   };
 
 
-  // Fetch the "end" query param from URL and trigger search on mount
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    if (params.get('start') && params.get('end')) {
-      setStartPoint(params.get('start') || '');
-      setEndPoint(params.get('end'));
-      setTravelDate(params.get('date') || '');
-      setTravelers(params.get('travelers') || 1);
-      setPackageId(params.get('packageId') || '');
-      setCommuteType(params.get('commute') || '');
-      setHotelName(finalPlace?.hotels?.[0]?.name || '');
-      setPackageName(finalPlace?.name || '');
-    }
-  }, [finalPlace?.hotels, finalPlace?.name, finalPlace.packageId, location.search, setCommuteType, setEndPoint, setHotelName, setPackageId, setPackageName, setStartPoint, setTravelDate, setTravelers]);
 
 
   return (
@@ -162,7 +158,7 @@ const BookingPage = () => {
                       {/* Booking Details Section */}
                       <div className="mb-4">
                         <h3 className="text-lg font-bold">Booking Details</h3>
-                        <BookingDetailsForm hotel={finalPlace?.hotels?.[0]?.name || ''} bookingDetails={bookingDetails} />
+                        <BookingDetailsForm bookingDetails={bookingDetails} />
                       </div>
 
                       {/* Summary Section below Booking Details */}

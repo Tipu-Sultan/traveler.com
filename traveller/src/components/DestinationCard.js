@@ -8,7 +8,7 @@ import { useSelector } from 'react-redux';
 const DestinationCard = ({ destination }) => {
   const {bookingDetails} = useSelector(state => state.booking)
   return (
-    <Link to={`/search/place/${destination.place_id}`} >
+    <Link to={`/search/place/${destination.packageId}`} >
       <div className="bg-white border border-gray-200 rounded-lg overflow-hidden transition-transform transform hover:scale-55 hover:shadow-2xl duration-300 ease-in-out  relative">
         <img
           src={destination.media.photos[0]}

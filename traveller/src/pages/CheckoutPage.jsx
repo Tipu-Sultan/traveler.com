@@ -1,15 +1,15 @@
 import React, { useCallback, useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { createBooking } from '../redux/slices/bookingSlice';
 import { generateOrderId } from '../services/orderIdGenerator';
 import Layout from '../layout/Layout';
 import useTravelerDetails from '../hooks/useTravelerDetails';
 import BookingSummary from '../components/booking/BookingSummary';
 import TravelerDetailsForm from '../components/booking/TravelerDetailsForm';
-import useBookingForm from '../hooks/useBookingForm';
 import useAuthData from '../hooks/useAuthData';
 import useBookingData from '../hooks/useBookingData';
+import useBookingForm from '../hooks/useBookingForm';
 
 
 const CheckoutPage = () => {
@@ -17,23 +17,30 @@ const CheckoutPage = () => {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const packageId = searchParams.get('packageId');
+  const packages = searchParams.get('package');
+
   const navigate = useNavigate();
   const { userData,isAuthenticated } = useAuthData()
-  const {checkoutPrice,finalPlace} = useBookingData(packageId)
+  const {checkoutPrice} = useBookingData(packageId)
+  const {updateBookingDetails} = useBookingForm();
+
   const { bookingDetails,loading } = useSelector((state) => state.booking);
   
-  const bookingId = generateOrderId(bookingDetails&&bookingDetails.packageName);
-  const {
-    travelDate,
-    setTravelDate, 
-    setTravelers,
-    setStartPoint,
-    setEndPoint,
-    setPackageId,
-    setHotelName,
-    setPackageName,
-    setCommuteType
-  } = useBookingForm(bookingDetails);
+  const bookingId = generateOrderId(bookingDetails && (bookingDetails.packageName || packages));
+
+  useEffect(() => {
+    const date = searchParams.get('date');
+    const travelers = searchParams.get('travelers');
+  
+
+    if (date && date !== bookingDetails.travelDate) {
+      updateBookingDetails('travelDate', date);
+    }
+    if (travelers && travelers !== bookingDetails.travelers) {
+      updateBookingDetails('travelers', travelers || 1);
+    }
+  
+  }, [location.search]); 
 
   const [travelerDetails, handleInputChange] = useTravelerDetails(
     {
@@ -51,20 +58,20 @@ const CheckoutPage = () => {
   const handleConfirmBooking = useCallback(() => {
     if (isAuthenticated) {
       const bookingPayload = {
-        startPoint:bookingDetails.startPoint || ' ',
-        endPoint:bookingDetails.endPoint || ' ',
-        bookingId: bookingDetails.bookingId,
-        package:bookingDetails.packageName,
+        startPoint:bookingDetails?.startPoint || ' ',
+        endPoint:bookingDetails?.endPoint || ' ',
+        bookingId: bookingDetails?.bookingId,
+        package:bookingDetails?.packageName,
         packageId,
-        userId: userData._id,
+        userId: bookingDetails?.userId,
         travelersDetails: travelerDetails,
         bookingDate: new Date(),
-        travelDate: bookingDetails.travelDate,
-        numberOfPeople: bookingDetails.travelers,
-        totalCost: bookingDetails.packagePrice || checkoutPrice,
-        commuteType: bookingDetails.commuteType,
-        hotelName: bookingDetails.hotelName,
-        numberOfRooms: bookingDetails.extraRooms,
+        travelDate: bookingDetails?.travelDate,
+        numberOfPeople: bookingDetails?.travelers,
+        totalCost: bookingDetails?.packagePrice || checkoutPrice,
+        commuteType: bookingDetails?.commuteType,
+        hotelName: bookingDetails?.hotelName,
+        numberOfRooms: bookingDetails?.extraRooms,
       };
 
       dispatch(createBooking(bookingPayload))
@@ -73,23 +80,9 @@ const CheckoutPage = () => {
     } else {
       navigate(`/login?redirect=/booking?=start=${bookingDetails?.startPoint}&end=${bookingDetails?.endPoint}&date=${bookingDetails.travelDate}&travelers=${bookingDetails.travelers}&commute=${bookingDetails?.commuteType}&package=${bookingDetails?.packageName}&hotel=${bookingDetails?.hotelName}&packageId=${packageId}`);
     }
-  }, [bookingDetails.bookingId, bookingDetails.commuteType, bookingDetails.endPoint, bookingDetails.extraRooms, bookingDetails.hotelName, bookingDetails.packageName, bookingDetails.packagePrice, bookingDetails.startPoint, bookingDetails.travelDate, bookingDetails.travelers, checkoutPrice, dispatch, isAuthenticated, navigate, packageId, travelerDetails, userData._id]);
+  }, [bookingDetails?.bookingId, bookingDetails?.commuteType, bookingDetails?.endPoint, bookingDetails?.extraRooms, bookingDetails?.hotelName, bookingDetails?.packageName, bookingDetails?.packagePrice, bookingDetails?.startPoint, bookingDetails.travelDate, bookingDetails.travelers, bookingDetails?.userId, checkoutPrice, dispatch, isAuthenticated, navigate, packageId, travelerDetails]);
 
-  // Fetch the "end" query param from URL and trigger search on mount
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    if (params.get('start') && params.get('end')) {
-      setStartPoint(params.get('start') || '');
-      setEndPoint(params.get('end'));
-      setTravelDate(params.get('date') || '');
-      setTravelers(params.get('travelers') || 1);
-      setPackageId(params.get('packageId') || '');
-      setHotelName(finalPlace?.hotels?.[0]?.name || '');
-      setPackageName(finalPlace?.name || '');
-      setCommuteType(params.get('commute') || '');
-    }
-  }, [finalPlace?.hotels, finalPlace?.name, finalPlace.packageId, location.search, setCommuteType, setEndPoint, setHotelName, setPackageId, setPackageName, setStartPoint, setTravelDate, setTravelers]);
-
+ 
 
   return (
     <Layout>

@@ -1,33 +1,32 @@
-// bookingSlice.js
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import bookingServices from '../services/bookingService';
 
 const initialState = {
-  updateBooking:{},
-  loading:'idle',
-  message:'',
-  error:false,
-  bookingDetails: {
-    startPoint:'',
-    endPoint:'',
-    bookingId:'',
+  updateBooking: {},
+  loading: 'idle',
+  message: '',
+  error: false,
+  bookingDetails: JSON.parse(localStorage.getItem('bookingDetails')) || { // Load from localStorage if available
+    startPoint: '',
+    endPoint: '',
+    bookingId: '',
     travelDate: '',
     departureDate: '',
     travelers: 1,
     extraRooms: 0,
     hotelName: '',
-    commuteType: '',
+    commuteType: 'on your own',
     userId: '',
     packageName: '',
     shortDetails: '',
-    packageId:'',
-    packagePrice: 0.00,
-    checkoutPrice:0.00,
-    travelersDetails:{
-        name: '',
-        email: '',
-        contact: '',
-        gender: '',
+    packageId: '',
+    packagePrice: 0.0,
+    checkoutPrice: 0.0,
+    travelersDetails: {
+      name: '',
+      email: '',
+      contact: '',
+      gender: '',
     },
   },
 };
@@ -39,20 +38,23 @@ export const createPaymentRequest = createAsyncThunk('booking/createPaymentReque
 export const updatePaymentRequest = createAsyncThunk('booking/updatePaymentRequest', bookingServices.updatePaymentRequest);
 export const deletePaymentRequest = createAsyncThunk('booking/deletePaymentRequest', bookingServices.deletePaymentRequest);
 
-
-
-
-
 const bookingSlice = createSlice({
   name: 'booking',
   initialState,
   reducers: {
     setBookingDetails(state, action) {
+      // Update the Redux state with the new booking details
       state.bookingDetails = { ...state.bookingDetails, ...action.payload };
+    
+      // Save only specific fields to localStorage
+      const { startPoint, endPoint, travelDate, travelers, ...rest } = state.bookingDetails;
+      localStorage.setItem('bookingDetails', JSON.stringify(rest));
     },
-    clearbookingDetails(state){
+    
+    clearbookingDetails(state) {
       state.bookingDetails = null;
-    }
+      localStorage.removeItem('bookingDetails'); // Remove from localStorage
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -79,9 +81,8 @@ const bookingSlice = createSlice({
         state.loading = 'idle';
         state.error = action.payload;
       })
-
       .addCase(getBookingDetails.pending, (state) => {
-        state.loading = 'getingDetails';
+        state.loading = 'gettingDetails';
       })
       .addCase(getBookingDetails.fulfilled, (state, action) => {
         state.loading = 'idle';
@@ -92,7 +93,6 @@ const bookingSlice = createSlice({
         state.loading = 'idle';
         state.error = action.payload;
       })
-
       .addCase(createPaymentRequest.pending, (state) => {
         state.loading = 'createBooking';
       })
@@ -114,10 +114,9 @@ const bookingSlice = createSlice({
       .addCase(updatePaymentRequest.rejected, (state, action) => {
         state.loading = 'idle';
         state.error = action.payload;
-      })
-      ;
+      });
   },
 });
 
-export const { setBookingDetails,clearbookingDetails} = bookingSlice.actions;
+export const { setBookingDetails, clearbookingDetails } = bookingSlice.actions;
 export default bookingSlice.reducer;
