@@ -12,7 +12,7 @@ const BookingSummary = ({ bookingDetails, hotel, checkoutPrice,finalPlace}) => (
       <p><span className="font-medium">Total Price:</span> ₹{bookingDetails.checkoutPrice}</p>
     </div>
     <img
-      src={'https://travelercom.vercel.app/static/media/logo.10af85ce2e3989e8d87e.jpg'}
+      src={'https://travellercom.vercel.app/static/media/logo.10af85ce2e3989e8d87e.jpg'}
       alt="Booking"
       className="mt-6 rounded-lg w-64 mx-auto mb-4"
     />

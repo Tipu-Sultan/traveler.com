@@ -96,11 +96,26 @@ const SearchBar = () => {
   
   // Function to handle the search action when the "Search" button is clicked
   const handleSearch = () => {
-    const query = `start=${bookingDetails?.startPoint}&end=${bookingDetails?.endPoint}&date=${bookingDetails?.travelDate}&travelers=${bookingDetails?.travelers}`;
-    navigate(`/search?${query}`);
-    dispatch(search({ query: bookingDetails?.endPoint, page: 1 }));
+    // Construct the query with only defined values
+    const queryParams = new URLSearchParams();
+  
+    if (bookingDetails?.startPoint) queryParams.append('start', bookingDetails?.startPoint);
+    if (bookingDetails?.endPoint) queryParams.append('end', bookingDetails?.endPoint);
+    if (bookingDetails?.travelDate) queryParams.append('date', bookingDetails?.travelDate);
+    if (bookingDetails?.travelers) queryParams.append('travelers', bookingDetails?.travelers);
+  
+    // Navigate with the updated query string
+    navigate(`/search?${queryParams.toString()}`);
+    
+    // Dispatch the search action for the endpoint
+    if (bookingDetails?.endPoint) {
+      dispatch(search({ query: bookingDetails?.endPoint, page: 1 }));
+    }
+    
+    // Clear suggestions after search
     dispatch(clearSuggestions());
   };
+  
 
   // Handle input change for start or end point
   const handleInputChange = (key, value) => {
@@ -173,7 +188,7 @@ const SearchBar = () => {
             className="w-full h-12 px-4 border border-gray-300 rounded-lg shadow-lg focus:outline-none focus:ring-2 focus:ring-orange-500 transition duration-300"
             aria-label="Travel Date"
           >
-            {bookingDetails?.travelDate ? bookingDetails?.travelDate : "Select Travel Date"}
+            {bookingDetails && bookingDetails?.travelDate ? bookingDetails?.travelDate : "Select Travel Date"}
           </button>
 
           {/* Calendar Modal */}

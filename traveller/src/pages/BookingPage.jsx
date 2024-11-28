@@ -12,6 +12,7 @@ import Policies from '../components/booking/Policies';
 import PlaceSummary from '../components/booking/PlaceSummary';
 import Spinner from '../components/Spinner';
 import useBookingData from '../hooks/useBookingData';
+import DynamicBreadcrumbs from '../components/Breadcrumbs';
 
 const BookingPage = () => {
   const location = useLocation();
@@ -73,7 +74,8 @@ const BookingPage = () => {
       ) : (
         <div className="bg-gray-100 py-10">
           <div className="max-w-6xl mx-auto bg-white shadow-lg rounded-lg p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 rounded-lg bg-gray-100">
+          <DynamicBreadcrumbs url={'/search/booking'} className="mb-8 text-blue-600 text-sm" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 rounded-lg bg-gray-100">
               {/* First Column */}
               <div>
                 <h2 className="text-2xl font-semibold">{finalPlace?.name}</h2>
@@ -81,7 +83,7 @@ const BookingPage = () => {
                 {/* Duration Badge */}
                 <div className="mt-2 flex items-center space-x-2">
                   <span className="bg-blue-500 text-white px-4 py-1 rounded-full text-sm">
-                    {finalPlace?.duration?.days} Days/{finalPlace?.duration?.nights} /Nights
+                  {finalPlace?.duration?.days} Days / {finalPlace?.duration?.nights} Nights
                   </span>
                   <span className="bg-blue-500 text-white px-4 py-1 rounded-full text-sm">
                     {finalPlace?.category}

@@ -25,7 +25,7 @@ const SearchResults = () => {
       <div>
         <SearchBar />
         <div className="max-w-7xl mx-auto px-4 mt-8">
-          <DynamicBreadcrumbs />
+          <DynamicBreadcrumbs url={'/search'}/>
           <h2 className="text-2xl font-semibold text-orange-500 mb-4">Search Results</h2>
 
           <p className="text-lg text-gray-700 mb-4">

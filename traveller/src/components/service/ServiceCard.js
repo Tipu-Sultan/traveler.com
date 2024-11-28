@@ -1,5 +1,5 @@
 import React from 'react';
-import StarRating from './StartRating';
+import StarRating from '../StartRating';
 import { useNavigate } from 'react-router-dom';
 
 const ServiceCard = ({ service }) => {

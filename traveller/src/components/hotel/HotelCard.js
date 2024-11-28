@@ -1,10 +1,9 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import StarRating from './StartRating';
+import StarRating from '../StartRating';
 
 const HotelCard = ({ hotel }) => {
   const navigate = useNavigate();
-
   const handleKnowMore = () => {
     navigate(`/search/hotel/${hotel.hotel_id}`);
   };

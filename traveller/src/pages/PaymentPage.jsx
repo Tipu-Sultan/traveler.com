@@ -24,7 +24,7 @@ const PaymentPage = () => {
             {/* Left Section */}
             <div className="flex flex-col items-center text-center p-6 space-y-4">
               <img
-                src={'https://travelercom.vercel.app/static/media/logo.10af85ce2e3989e8d87e.jpg'}
+                src={'https://travellercom.vercel.app/static/media/logo.10af85ce2e3989e8d87e.jpg'}
                 alt="Company Logo"
                 className="w-36 h-36 object-contain rounded-full shadow-md"
               />

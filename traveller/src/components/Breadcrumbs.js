@@ -1,68 +1,36 @@
 import React from 'react';
-import { useLocation, Link as RouterLink } from 'react-router-dom';
-import ThankYou from '../pages/ThankYou';
+import { Link as RouterLink } from 'react-router-dom';
 
-const DynamicBreadcrumbs = () => {
-  const location = useLocation();
-
-  // Split the pathname and filter out empty segments
-  const pathnames = location.pathname
-    .split('/')
-    .filter((x) => x);
-
-  // Mapping for URL segments to human-readable names
-  const breadcrumbNameMap = {
-    home: 'Home',
-    profile: 'Profile',
-    booking: 'booking',
-    Thankyou:'thank-you',
-    search: 'Search',
-    place: 'Place',
-    hotels: 'Hotels',
-    rentals: 'Nearby Rentals',
-    about: 'About Us',
-    services: 'Our Services',
-    contact: 'Contact Us',
-    // Add more mappings as needed
-  };
-
-  // Helper function to determine if a segment is likely a parameter
-  const isParameter = (segment) => /^[a-zA-Z0-9-_]+$/.test(segment) && !breadcrumbNameMap[segment];
+const DynamicBreadcrumbs = ({ url }) => {
+  // Split the passed URL by '/' and remove any empty segments
+  const pathnames = url.split('/').filter(Boolean);
 
   return (
     <nav aria-label="breadcrumb" className="mb-4">
       <ol className="flex">
+        {/* Home breadcrumb */}
         <li>
           <RouterLink to="/" className="text-blue-500 hover:text-blue-700">
             Home
           </RouterLink>
         </li>
-        {pathnames.map((value, index) => {
-          if (isParameter(value)) return null; // Skip parameters
-
+        {/* Loop through each pathname and render breadcrumbs */}
+        {pathnames.map((segment, index) => {
           const to = `/${pathnames.slice(0, index + 1).join('/')}`;
           const isLast = index === pathnames.length - 1;
 
-          // Convert URL segment to human-readable name or default to the capitalized value
-          const name = breadcrumbNameMap[value] || value.charAt(0).toUpperCase() + value.slice(1);
-
-          // Render last breadcrumb as plain text
-          if (isLast) {
-            return (
-              <li key={to} className="flex items-center">
-                <span className="mx-2 text-gray-500">/</span>
-                <span className="font-semibold text-gray-800">{name}</span>
-              </li>
-            );
-          }
-
-          // Render other segments as links
           return (
             <li key={to} className="flex items-center">
               <span className="mx-2 text-gray-500">/</span>
-              <RouterLink to={to} className="text-blue-500 hover:text-blue-700">
-                {name}
-              </RouterLink>
+              {isLast ? (
+                // Last segment is plain text (disabled)
+                <span className="text-gray-500">{segment.replace(/-/g, ' ')}</span>
+              ) : (
+                // Other segments are links
+                <RouterLink to={to} className="text-blue-500 hover:text-blue-700">
+                  {segment.replace(/-/g, ' ')}
+                </RouterLink>
+              )}
             </li>
           );
         })}
