@@ -5,7 +5,7 @@ const HotelsList = ({ hotels }) => {
   return (
     <div className="space-y-4">
       <h3 className="text-xl font-semibold text-blue-600">Recommended Hotels</h3>
-      {hotels.map((hotel, index) => (
+      {hotels?.map((hotel, index) => (
         <HotelCard key={index} hotel={hotel} />
       ))}
     </div>

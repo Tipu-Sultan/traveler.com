@@ -32,7 +32,7 @@ const BikeRentalDetails = () => {
                 !loading && (
                     <>
                         <div className="flex flex-col gap-6 p-6 max-w-7xl mx-auto rounded-lg">
-                            <DynamicBreadcrumbs />
+                            <DynamicBreadcrumbs url={'/booking/rental'} />
 
                             {/* Loading spinner */}
                             {loading && <Spinner />}

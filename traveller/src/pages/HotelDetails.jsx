@@ -44,7 +44,7 @@ const HotelDetails = () => {
                     <>
                         <div className="flex flex-col md:flex-row gap-6 p-6 max-w-7xl mx-auto bg-white rounded-lg">
                             <div className="flex-1">
-                                <DynamicBreadcrumbs />
+                                <DynamicBreadcrumbs url={'/booking/hotel'} />
                                 {/* Loading spinner */}
                                 {loading && (
                                     <Spinner />
