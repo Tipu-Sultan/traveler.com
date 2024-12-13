@@ -3,7 +3,7 @@ import { Link as RouterLink } from 'react-router-dom';
 
 const DynamicBreadcrumbs = ({ url }) => {
   // Split the passed URL by '/' and remove any empty segments
-  const pathnames = url.split('/').filter(Boolean);
+  const pathnames = url?.split('/').filter(Boolean);
 
   return (
     <nav aria-label="breadcrumb" className="mb-4">
@@ -15,8 +15,8 @@ const DynamicBreadcrumbs = ({ url }) => {
           </RouterLink>
         </li>
         {/* Loop through each pathname and render breadcrumbs */}
-        {pathnames.map((segment, index) => {
-          const to = `/${pathnames.slice(0, index + 1).join('/')}`;
+        {pathnames?.map((segment, index) => {
+          const to = `/${pathnames?.slice(0, index + 1)?.join('/')}`;
           const isLast = index === pathnames.length - 1;
 
           return (
