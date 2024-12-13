@@ -23,7 +23,6 @@ const ProfilePage = () => {
   return (
     <Layout title="Profile | Traveller.com">
       <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg mt-10">
-      <DynamicBreadcrumbs/>
         {loading === 'userLoading' ? (
           <Spinner />
         ) : error ? (
